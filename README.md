@@ -84,9 +84,9 @@ Most existing solutions for finetuning pathology models are either **too heavy**
 # 1. Clone the repo
 git clone <YOUR-REPO-URL>.git
 cd <YOUR-REPO-NAME>
+pip install -e .
 
-# 2. Install dependencies
-pip install -r requirements.txt
 
 # 3. Run a minimal finetuning example
 python train.py --config configs/finetune_example.yaml
+```
