@@ -1,0 +1,25 @@
+# --- deep learning ---
+torch>=2.0
+torchvision>=0.15
+
+# --- image and WSI handling ---
+openslide-python
+pillow
+numpy
+opencv-python
+scikit-image
+matplotlib
+
+# --- SAM / MedSAM ---
+segment-anything @ git+https://github.com/facebookresearch/segment-anything.git
+
+# --- utilities ---
+tqdm
+cv2geojson
+
+# --- development (optional) ---
+black
+ruff
+pytest
+ipython
+jupyter

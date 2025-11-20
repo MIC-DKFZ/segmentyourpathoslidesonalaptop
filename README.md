@@ -82,6 +82,7 @@ Most existing solutions for finetuning pathology models are either **too heavy**
 
 ```bash
 # 1. Clone the repo
+conda create -n medsam_patho python=3.10
 git clone <YOUR-REPO-URL>.git
 cd <YOUR-REPO-NAME>
 pip install -e .
