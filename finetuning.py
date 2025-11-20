@@ -73,9 +73,9 @@ class WSICystDataset(Dataset):
     2. Corresponding mask files (e.g., JSON annotations converted to binary masks or TIF) are also available.
     """
 
-    def __init__(self, data_dir, tile_size):
+    def __init__(self, data_dir, tile_size, args):
         self.tile_size = tile_size
-        self.slide_list = [f"slide_{i}.svs" for i in range(5)]  # 5 annotated slides
+        self.slide_list = [f"slide_{i}.svs" for i in range(args.ANNOTATED_SLIDES)]  # 5 annotated slides
         self.all_tile_coords = []
         self.slide_handles = {}
         print(self.slide_list)
@@ -90,24 +90,13 @@ class WSICystDataset(Dataset):
             self.slide_handles[slide_name] = {
                 'slide': slide,
                 'mask_path': mask_path,
-                'level': get_openslide_level(slide, MAGNIFICATION_LEVEL) if 'openslide' in globals() else 2
+                'level': get_openslide_level(slide, args.MAGNIFICATION_LEVEL) if 'openslide' in globals() else 2
             }
 
             # 2. Pre-calculate tile coordinates for all slides
             # This is a critical step in WSI processing: efficiently deciding which tiles to sample.
             # Here we mock 10 tiles per slide.
             slide_width, slide_height = slide.level_dimensions[self.slide_handles[slide_name]['level']]
-            """
-            for i in range(10):  # Mocking 10 relevant tiles per slide
-                # --- FIX: Ensure the upper bound for randint is positive ---
-                # If slide_width == tile_size (0 range), max_x will be 1, forcing randint(0, 1) to return 0.
-                max_x = max(1, slide_width - tile_size)
-                max_y = max(1, slide_height - tile_size)
-
-                x = np.random.randint(0, max_x)
-                y = np.random.randint(0, max_y)
-                self.all_tile_coords.append((slide_name, x, y))
-            """
             ### >>> IDEAL TILE SELECTION (bias toward annotated mask) <<<
             N_TILES_PER_SLIDE = 100
             CANDIDATE_STRIDE = max(1, self.tile_size // 4)  # coarse stride for speed; tune as desired
@@ -288,7 +277,7 @@ def initialize_medsam(checkpoint_path, model_type):
 
 
 # --- 3. Finetuning Loop ---
-def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int):
+def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int, project_name):
     """Runs the finetuning process."""
 
     # Set up optimizer and loss function
@@ -348,28 +337,6 @@ def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int):
             # Backpropagation
             loss.backward()
             optimizer.step()
-            """
-            from PIL import Image
-            import time
-            BasePath='Output'
-            images=images.permute(0,2,3,1)
-            images=images[0,:,:,:].cpu()
-            images=images*255
-            PIL_image = Image.fromarray(np.uint8(images)).convert('RGB')
-            timestr = time.strftime("%Y%m%d-%H%M%S")
-            PIL_image.save(os.path.join(BasePath,timestr+'.png'))
-            mask=gt_masks.permute(0,2,3,1)
-            mask=mask[0,:,:,0].cpu()
-            mask=mask*255
-            mask_img=Image.fromarray(np.uint8(mask))
-            mask_img.save(os.path.join(BasePath,timestr+'_mask'+'.png'))
-
-            mask_logits=mask_logits.permute(0,2,3,1).detach()
-            mask_logits=mask_logits[0,:,:,0].cpu()
-            mask_logits=mask_logits*255
-            mask_logits=Image.fromarray(np.uint8(mask))
-            mask_logits.save(os.path.join(BasePath,timestr+'_logits'+'.png'))
-            """
 
             epoch_loss += loss.item()
             pbar.set_postfix({'Loss': f'{loss.item():.4f}'})
@@ -379,24 +346,39 @@ def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int):
 
     print("Finetuning complete.")
     # --- 4. Save the Finetuned Weights ---
-    torch.save(model.state_dict(), "finetuned_medsam_cyst_segmentation.pth")
-    print("Finetuned model saved to 'finetuned_medsam_cyst_segmentation.pth'")
+    torch.save(model.state_dict(), project_name+".pth")
+
 
 
 # --- 5. Main Execution ---
 if __name__ == "__main__":
-    # Ensure the model directory exists for the mock data setup
-    # 1. Initialize Dataset and Dataloader
-    cyst_dataset = WSICystDataset(data_dir=WSI_DATA_DIR, tile_size=TILE_SIZE)
-    cyst_dataloader = DataLoader(cyst_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+
+    parser = argparse.ArgumentParser(
+        description="Finetuning of a segmentation model to your specific structures."
+    )
+    # Required arguments
+    parser.add_argument('--task', type=str, help='Your Task description, that is used to name the resulting checkpoint')
+    parser.add_argument('--MEDSAM_CHECKPOINT_PATH', type=str, required=True, help='Path to the checkpoint that you have downloaded.', default="/Users/Downloads/medsam_vit_b.pth")
+    parser.add_argument('--WSI_DATA_DIR', type=str, required=True, help='Path to your slide_1.svs and slide_1_mask.npy')
+    parser.add_argument('--TILE_SIZE', type=int, default=1024, help='Patchsize')
+    parser.add_argument('--MAGNIFICATION_LEVEL', type=int, default=40)
+    parser.add_argument('--EPOCHS', type=int, default=10)
+    parser.add_argument('--BATCH_SIZE', type=int, default=1)
+    parser.add_argument('--ANNOTATED_SLIDES', type=int, default=1,help='The amount of slides you have annotated')
+    parser.add_argument('--LEARNING_RATE', type=int, default=1e-5)
+    parser.add_argument('--DEVICE', type=str, help='mps if you have a mac, cuda if you have a GPU, or cpu if you have none of the previous')
+
+    args = parser.parse_args()
+    cyst_dataset = WSICystDataset(data_dir=args.WSI_DATA_DIR, tile_size=args.TILE_SIZE, args)
+    cyst_dataloader = DataLoader(cyst_dataset, batch_size=args.BATCH_SIZE, shuffle=True, drop_last=True)
     print(f"Dataset ready: {len(cyst_dataset)} tiles prepared for finetuning.")
 
     # 2. Initialize MedSAM Model
-    medsam_model = initialize_medsam(MEDSAM_CHECKPOINT_PATH, MODEL_TYPE)
+    medsam_model = initialize_medsam(args.MEDSAM_CHECKPOINT_PATH, 'vit_b')
 
     if medsam_model:
         # 3. Start Finetuning
-        finetune_medsam(medsam_model, cyst_dataloader, EPOCHS)
+        finetune_medsam(medsam_model, cyst_dataloader, args.EPOCHS, args.task)
 
     print("\n--- Next Steps for Annotation ---")
     print("After finetuning, load the 'finetuned_medsam_cyst_segmentation.pth' weights.")
