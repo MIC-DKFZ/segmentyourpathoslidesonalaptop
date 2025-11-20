@@ -2,7 +2,7 @@
 
 <!-- Project Banner -->
 <p align="center">
-  <img src="assets/banner.svg" alt="Pathology Finetuning Framework Banner" width="70%">
+  <img src="banner.png" alt="Pathology Finetuning Framework Banner" width="70%">
 </p>
 
 <h1 align="center">Pathology Slide Finetuning Framework</h1>
