@@ -92,10 +92,12 @@ python train.py --config configs/finetune_example.yaml
 ```
 ## ✏️ Provide GT segmentations
 1. Annotate as much slides as you want (of course the amount of annotated slides impacts the performance)
+
 2. Load your images to QuPath 
 <img src="images/Screenshot from 2025-11-20 13-24-00.png" alt="Create sample annotations" width="70%">
-3. For fast annotations, we recommedn using the magic brush from the tools bar in QuPath
-4. Select > File > Export objects as geojson > Export All objects 
 
+3. For fast annotations, we recommedn using the magic brush from the tools bar in QuPath
+
+4. Select > File > Export objects as geojson > Export All objects 
 
 5. Name your slide and geojson slide_1.svs + slide_1
