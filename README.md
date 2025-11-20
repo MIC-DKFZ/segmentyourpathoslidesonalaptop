@@ -103,9 +103,11 @@ python train.py --config configs/finetune_example.yaml
 5. Name your slide and geojson slide_1.svs + slide_1.geojson
 
 6. Convert your geojson into numpy 
+
 ````
 python3 ConvertGeoJsonToNumpy.py --wsi /Path/slide_4.svs --geojson /Path/slide_4.geojson --out /Path/slide_4_mask.npy --level 0
 ```
+
 7. Repeat this for as many slides as you want, continue naming them slide_2.svs + slide_2.geojson
 
 8. Download the initial MedSam checkpoint from https://drive.google.com/file/d/1UAmWL88roYR7wKlnApw5Bcuzf2iQgk6_/view?usp=drive_link and make sure you give the Lab from MedSam proper credit when you use it https://github.com/bowang-lab/MedSAM
