@@ -1,4 +1,4 @@
-# SegmentYourPathoSlidesOnALaptop
+# Segment Really Anything - Even Your Whole Slide Images on a Laptop
 
 
 
