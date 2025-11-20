@@ -4,9 +4,16 @@
 
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Limitations of Existing Solutions
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+| Method / Ecosystem | Strengths | Major Limitations (Motivation for This Project) |
+|--------------------|-----------|--------------------------------------------------|
+| **MONAI Label Server** | Good integration with MONAI pipelines; semi-automatic labeling | Requires dedicated **GPU server**, difficult to run on laptops; complex setup; produces **cryptic runtime errors**; not optimized for WSI-scale finetuning |
+| **Napari Pathology Plugins** | Plugin-based architecture; simple UI | Many plugins are **outdated**, unstable, or unmaintained; poor handling of large WSIs; limited or no finetuning support; segmentation tools often unreliable |
+| **MedSAM / SAM Finetuning** | Strong pretrained segmentation capabilities | Finetuning typically produces only **binary/semantic segmentation masks**; output masks **cannot be viewed or edited directly in QuPath**; workflows are often non-transparent, difficult to customize |
+| **Generic PyTorch/TensorFlow Scripts** | Full flexibility; research-friendly | Not optimized for WSIs; require extensive coding; missing built-in **patch extraction, slide metadata handling, QuPath mask support**, or pathology-specific evaluation tools |
+| **Commercial Annotation Tools** | Polished UI, enterprise support | Limited customizability; expensive; finetuning often not transparent; export formats frequently **incompatible with open-source pathology tools** |
+
 
 ## Add your files
 
