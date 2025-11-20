@@ -12,23 +12,6 @@ from torchvision.transforms import functional as F
 import openslide
 import random
 
-
-# --- Configuration ---
-# IMPORTANT: Adjust these paths and parameters for your environment
-MODEL_TYPE = "vit_b"  # MedSAM is typically based on ViT-B or ViT-L
-MEDSAM_CHECKPOINT_PATH = "/Users/maximilianfischer/PycharmProjects/MedSam/MedSAM/work_dir/MedSAM/medsam_vit_b.pth"  # Path to your downloaded MedSAM weights
-WSI_DATA_DIR = "/Users/maximilianfischer/PycharmProjects/MedSam/WSIs"  # Directory containing your SVS files and mask files
-TILE_SIZE = 1024
-MAGNIFICATION_LEVEL = 40  # WSI level to extract tiles from (e.g., 20x or level 0/1/2)
-EPOCHS = 10
-BATCH_SIZE = 1
-LEARNING_RATE = 1e-5
-DEVICE = torch.device("mps")
-
-# --- 1. Data Loading and Preprocessing (WSI Tiling Mock) ---
-
-# Mocking openslide and WSI handling as they cannot be run in this environment.
-# In a real setup, you would use the 'openslide' library here.
 try:
     import openslide
 

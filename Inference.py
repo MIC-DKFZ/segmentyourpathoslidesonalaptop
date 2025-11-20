@@ -199,7 +199,7 @@ def polygons_from_mask(mask: np.ndarray, min_area: int = 0) -> List[np.ndarray]:
 
 # ----------------------- Main -----------------------
 
-slides=glob.glob('/Volumes/INTENSO/Projekt Zystennieren/Histobilder Nieren PKD/Niere li/Niere li 1/*.svs')
+slides=glob.glob('Path to your slides/*.svs')
 weights='finetuned_medsam_cyst_segmentation.pth'
 model_type='vit_b'
 tile_size=1024
@@ -236,7 +236,7 @@ for wsi in slides:
 
     mask = binarize_logits(logits, threshold=threshold)  # uint8 {0,1}
     tissue_mask=generate_tissue_mask(slide)
-    out_path=wsi.replace('/Volumes/INTENSO/Projekt Zystennieren/Histobilder Nieren PKD','/Users/maximilianfischer/PycharmProjects/MedSam/Inference').replace('.svs','.geojson')
+    out_path=wsi.replace('.svs','.geojson')
     os.makedirs(os.path.dirname(out_path),exist_ok=True)
     export_geojson(mask,tissue_mask,out_path)
 
