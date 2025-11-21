@@ -200,7 +200,7 @@ def polygons_from_mask(mask: np.ndarray, min_area: int = 0) -> List[np.ndarray]:
 # ----------------------- Main -----------------------
 
 slides=glob.glob('Path to your slides/*.svs')
-weights='finetuned_medsam_cyst_segmentation.pth'
+weights='finetuned_medsam_cyst_segmentation.pth' # Load here your previously finetuned checkpoint
 model_type='vit_b'
 tile_size=1024
 stride=1024

@@ -11,6 +11,7 @@ from segment_anything.modeling import Sam
 from torchvision.transforms import functional as F
 import openslide
 import random
+import argparse
 
 try:
     import openslide
@@ -228,12 +229,12 @@ class WSICystDataset(Dataset):
 
 
 # --- 2. Model Initialization ---
-def initialize_medsam(checkpoint_path, model_type):
+def initialize_medsam(checkpoint_path, model_type, args):
     """Loads the SAM model and initializes it with MedSAM weights."""
     print(f"Loading SAM model with type: {model_type}...")
     try:
         # 1. Load the state dictionary explicitly, mapping to the determined device (CPU or CUDA)
-        state_dict = torch.load(checkpoint_path, map_location=DEVICE)
+        state_dict = torch.load(checkpoint_path, map_location=args.DEVICE)
 
         # 2. Initialize the model architecture
         sam = sam_model_registry[model_type]()
@@ -254,31 +255,31 @@ def initialize_medsam(checkpoint_path, model_type):
         else:
             param.requires_grad = True
 
-    sam.to(DEVICE)
+    sam.to(args.DEVICE)
     print("MedSAM model loaded and parameters set for finetuning.")
     return sam
 
 
 # --- 3. Finetuning Loop ---
-def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int, project_name):
+def finetune_medsam(model: Sam, dataloader: DataLoader, epochs: int, project_name, args):
     """Runs the finetuning process."""
 
     # Set up optimizer and loss function
     # Only optimizing parameters that require gradients (i.e., not the image encoder)
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LEARNING_RATE)
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.LEARNING_RATE)
     criterion = CombinedLoss()
 
     model.train()  # Set model to training mode
-    print(f"\nStarting finetuning on device: {DEVICE}")
+    print(f"\nStarting finetuning on device: {args.DEVICE}")
 
     for epoch in range(1, epochs + 1):
         epoch_loss = 0.0
         pbar = tqdm(dataloader, desc=f"Epoch {epoch}/{epochs}")
 
         for batch_idx, data in enumerate(pbar):
-            images = data['image'].to(DEVICE)
-            gt_masks = data['gt_mask'].to(DEVICE)
-            box_prompts = data['box_prompt'].to(DEVICE)
+            images = data['image'].to(args.DEVICE)
+            gt_masks = data['gt_mask'].to(args.DEVICE)
+            box_prompts = data['box_prompt'].to(args.DEVICE)
             original_size = data['original_size']
             # Reset gradients
             optimizer.zero_grad()
@@ -348,20 +349,20 @@ if __name__ == "__main__":
     parser.add_argument('--EPOCHS', type=int, default=10)
     parser.add_argument('--BATCH_SIZE', type=int, default=1)
     parser.add_argument('--ANNOTATED_SLIDES', type=int, default=1,help='The amount of slides you have annotated')
-    parser.add_argument('--LEARNING_RATE', type=int, default=1e-5)
-    parser.add_argument('--DEVICE', type=str, help='mps if you have a mac, cuda if you have a GPU, or cpu if you have none of the previous')
+    parser.add_argument('--LEARNING_RATE', type=float, default=1e-5)
+    parser.add_argument('--DEVICE', type=str, default='cpu', help='mps if you have a mac, cuda if you have a GPU, or cpu if you have none of the previous')
 
     args = parser.parse_args()
-    cyst_dataset = WSICystDataset(data_dir=args.WSI_DATA_DIR, tile_size=args.TILE_SIZE, args)
+    cyst_dataset = WSICystDataset(data_dir=args.WSI_DATA_DIR, tile_size=args.TILE_SIZE, args=args)
     cyst_dataloader = DataLoader(cyst_dataset, batch_size=args.BATCH_SIZE, shuffle=True, drop_last=True)
     print(f"Dataset ready: {len(cyst_dataset)} tiles prepared for finetuning.")
 
     # 2. Initialize MedSAM Model
-    medsam_model = initialize_medsam(args.MEDSAM_CHECKPOINT_PATH, 'vit_b')
+    medsam_model = initialize_medsam(args.MEDSAM_CHECKPOINT_PATH, 'vit_b', args)
 
     if medsam_model:
         # 3. Start Finetuning
-        finetune_medsam(medsam_model, cyst_dataloader, args.EPOCHS, args.task)
+        finetune_medsam(medsam_model, cyst_dataloader, args.EPOCHS, args.task, args)
 
     print("\n--- Next Steps for Annotation ---")
     print("After finetuning, load the 'finetuned_medsam_cyst_segmentation.pth' weights.")

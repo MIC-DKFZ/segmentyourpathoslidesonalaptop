@@ -95,13 +95,13 @@ python train.py --config configs/finetune_example.yaml
 1. Annotate as much slides as you want (of course the amount of annotated slides impacts the performance)
 
 2. Load your images to QuPath 
-<img src="images/Screenshot from 2025-11-20 13-24-00.png" alt="Create sample annotations" width="70%">
+<img src="images/AnnotationInstructions.png" alt="Create sample annotations" width="70%">
 
 3. For fast annotations, we recommedn using the magic brush from the tools bar in QuPath
 
 4. Select > File > Export objects as geojson > Export All objects 
 
-5. Name your slide and geojson slide_1.svs + slide_1.geojson
+5. Name your slide and geojson slide_0.svs + slide_0.geojson. THE NAMING MUST BEGIN WITH 0!
 
 6. Convert your geojson into numpy 
 
@@ -112,3 +112,12 @@ python3 ConvertGeoJsonToNumpy.py --wsi /Path/slide_4.svs --geojson /Path/slide_4
 
 8. Download the initial MedSam checkpoint from https://drive.google.com/file/d/1UAmWL88roYR7wKlnApw5Bcuzf2iQgk6_/view?usp=drive_link and make sure you give the Lab from MedSam proper credit when you use it https://github.com/bowang-lab/MedSAM
 
+9. Start finetuning of the segmentation model on your annotated tiles
+
+```
+python3 finetuning.py --task <describe_here_your_task (e.g. GlomeruliSegmentationOnMassonsTrichrome)> --MEDSAM_CHECKPOINT_PATH <define here the path to the checkpoint that you have previously downloaded> --WSI_DATA_DIR <where-your-data-is-located> --TILE_SIZE <WSIs need to be patched into smaller images, define here the size (depends on your computer RAM)> --MAGNIFICATION_LEVEL <usually 20 or 40> --EPOCHS <10 is recommended> --BATCH_SIZE <set to 1 or two for your laptop> --ANNOTATED_SLIDES <How many slides have you sampled> --LEARNING_RATE <1e-5> --DEVICE <if your computer has a GPU then set to cuda, if you have a MAC with M2 processor or later then mps, for all others set simply to cpu>
+```
+10. After training is finished, adjust in the Inference script the path to the checkpoint after your finetuning and the path to the slides and then run python3 Inference.py
+
+11. Visualize your AI generated segmentations in QuPath: 
+<img src="images/resultVisualization.png" alt="Create sample annotations" width="70%">
