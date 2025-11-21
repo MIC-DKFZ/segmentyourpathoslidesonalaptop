@@ -121,3 +121,9 @@ python3 finetuning.py --task <describe_here_your_task (e.g. GlomeruliSegmentatio
 
 11. Visualize your AI generated segmentations in QuPath: 
 <img src="images/resultVisualization.png" alt="Create sample annotations" width="70%">
+
+## License
+This project is made avialble under the CreativeCommons License. See the license file for more details.
+
+## Acknowledgement
+Please cite any of my publications if you find this repo useful 
