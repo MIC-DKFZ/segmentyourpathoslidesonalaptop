@@ -127,3 +127,7 @@ This project is made avialble under the CreativeCommons License. See the license
 
 ## Acknowledgement
 Please cite any of my publications if you find this repo useful 
+
+## Copyright
+Segment Really Anything - Even Your Whole Slide Images on a Laptop is developed and maintained by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ).
+<img src="images/DKFZ_Logo.png" alt="Create sample annotations" width="70%">
