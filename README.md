@@ -126,7 +126,7 @@ python3 finetuning.py --task <describe_here_your_task (e.g. GlomeruliSegmentatio
 This project is made avialble under the CreativeCommons License. See the license file for more details.
 
 ## Acknowledgement
-Please cite the release of this repo via zenodo if you find it useful.
+Please cite the release of this repo via zenodo https://doi.org/10.5281/zenodo.17720737 if you find it useful.
 
 ## Copyright
 Segment Really Anything - Even Your Whole Slide Images on a Laptop is developed and maintained by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ).
